@@ -6,7 +6,7 @@
 
 # 🔁 WiFi Repeater
 
-**NAT range extender · softAP + STA · web & serial config**
+**NAT range extender · hardened web config · JSON status · mDNS**
 
 ![platform](https://img.shields.io/badge/platform-ESP32-1e88e5?style=for-the-badge)
 ![mode](https://img.shields.io/badge/mode-NAT_Repeater-00e5a0?style=for-the-badge)
@@ -20,7 +20,7 @@
 
 </div>
 
-> A proper **NAT-based WiFi range extender**. The ESP32 holds a **STA** link to your router and simultaneously runs a **softAP** for clients; lwIP's `CONFIG_LWIP_IPV4_NAPT` (compiled into the ESP32 core) forwards traffic between them. Configure it from the web page or the serial console — settings live in **Preferences (NVS)** and survive power cycles.
+> A production-grade **NAT-based WiFi range extender**. The ESP32 holds a **STA** link to your router and simultaneously runs a **softAP** for clients; lwIP's `CONFIG_LWIP_IPV4_NAPT` forwards traffic between them. The configuration panel is behind **HTTP Basic Auth**, never echoes stored passwords back to the browser, HTML-escapes every field and validates input lengths. Uplink reconnects use **exponential back-off**, NAPT re-arms itself after every reconnect, and all settings live in **Preferences (NVS)**.
 
 <details>
 <summary>📑 <b>Table of Contents</b></summary>
@@ -64,18 +64,22 @@
 
 ![flow](assets/flow.svg)
 
-Single radio ⇒ both links share one channel, so expect roughly **half** of the router's throughput — that is physics, not a bug.
+Single radio ⇒ both links share one channel, so expect roughly **half** of the router's throughput — that is physics, not a bug. The panel is protected by HTTP Basic Auth and stored passwords are never echoed back to the browser.
 
 ## ✨ Features
 
 | ✨ Feature | 📝 Description |
 |:--|:--|
 | 🔁 **True NAT** | lwIP NAPT bridges softAP clients to the STA uplink |
-| 🌐 **Web config** | Set router SSID/pass + AP name/pass from the browser |
-| ⌨️ **Serial console** | 9 commands — `ssid pass apssid appass show save reset reboot` |
-| 💾 **NVS storage** | `Preferences` keeps config across reboots |
-| 🏭 **Factory reset** | `reset` wipes credentials instantly |
-| 📡 **Same-channel** | STA + AP share the single 2.4 GHz radio → no radio conflict |
+| 🔐 **HTTP Basic Auth** | Panel + `/save` need login; defaults `admin` / `admin` (change it) |
+| 🙈 **No password echo** | Stored passwords are never sent back to the browser |
+| 📊 **JSON status** | Open `GET /api/status` for uptime, RSSI, clients, NAPT, heap |
+| 📶 **Self-healing uplink** | Exponential back-off (5→10→20→30 s) + `setAutoReconnect` |
+| 🎚️ **NAPT re-arm** | NAT is re-enabled automatically after every STA reconnect |
+| 🏷️ **mDNS** | Reach the panel at `http://repeater.local` |
+| 💡 **Status LED** | Solid = uplink OK · slow blink = reconnecting · fast blink = needs config |
+| 🏭 **Factory reset** | Serial `reset` **or hold BOOT 5 s** → wipes NVS and reverts defaults |
+| ⌨️ **Serial console** | 13 commands incl. `user` / `hpass` / `status` / `version` |
 
 ## 📦 Firmware files
 
@@ -85,9 +89,9 @@ Flash the file that matches your workflow:
 
 | File | Flash offset | Size | SHA-256 (first 16) |
 |:--|:--|:--|:--|
-| `WiFiRepeater-full.bin` | `0x0` | 4.0 MB | `0e3d4da38baa08b2…` |
-| `WiFiRepeater-app.bin` | `0x10000` | 914.6 KB | `932bf404afed1e62…` |
-| `WiFiRepeater-bootloader.bin` | `0x1000` | 24.4 KB | `47bbbfca119fe871…` |
+| `WiFiRepeater-full.bin` | `0x0` | 4.0 MB | `b7ba0493eba96844…` |
+| `WiFiRepeater-app.bin` | `0x10000` | 967.7 KB | `5563bff34c890211…` |
+| `WiFiRepeater-bootloader.bin` | `0x1000` | 22.9 KB | `7c5e6c42dcd3b658…` |
 | `WiFiRepeater-partitions.bin` | `0x8000` | 3.0 KB | `aaae2888c5a6a348…` |
 | `WiFiRepeater-ota.bin` | `0xE000` | 8.0 KB | `f94c5d786a7a8fab…` |
 
@@ -133,32 +137,35 @@ Use the official **[Espressif Flash Download Tool](https://www.espressif.com/en/
 
 ## ▶️ How to Use
 
-1. Flash, power on, then join the open **`ESP_Repeater`** network.
-2. Open **`http://192.168.4.1`** and fill in **your router's SSID + password**.
-3. Optionally rename the repeater's own network and give it a password (leave `none` for open).
-4. Press **SAVE** — the board stores the config in flash and reboots.
-5. Join the **new repeater network** — internet now works through it.
-6. Done? Everything survives power cycles. Use `reset` on the serial console for a factory reset.
+1. Flash, power on, then join **`ESP_Repeater`** — password **`repeater123`**.
+2. Open **`http://192.168.4.1`** (or **`http://repeater.local`**) and log in — default **`admin` / `admin`**.
+3. Fill in **your router's SSID + password**; optionally rename the repeater AP (type `none` for open).
+4. Press **Save & Reboot** — input is validated, stored in NVS and the board restarts.
+5. Join the **new repeater network** — internet now works through it (NAPT).
+6. Monitor it with `GET /api/status` (JSON) or the LED (solid = link up).
+7. Clean slate? Serial `reset`, or **hold BOOT 5 seconds** for a factory reset.
 
 ## 🔑 Login / Access
 
 | Item | Value |
 |:--|:--|
 | 📶 **WiFi network (AP)** | `ESP_Repeater` |
-| 🔑 **AP password** | `(open — no password)` |
-| 🌍 **Panel URL** | **`http://192.168.4.1`** |
+| 🔑 **AP password** | `repeater123` |
+| 🌍 **Panel URL** | **`http://192.168.4.1 (or http://repeater.local)`** |
 | 🖥️ **Control IP** | `192.168.4.1` |
 | ⌨️ **Serial baud rate** | `115200` |
-
+| 🔐 Panel login | `admin / admin — change it on the panel` |
+| 🔑 Factory reset | `hold BOOT 5 s — or serial reset` |
 
 ## 🌐 Web panel & API
 
-Everything on the panel is a plain GET request, so you can also script it with `curl`:
+Endpoints are plain HTTP — script them with `curl`:
 
 | Method | Endpoint | Description |
 |:--|:--|:--|
-| `GET` | `/` | Configuration form (uplink + AP credentials) |
-| `GET` | `/save` | Persist settings to NVS and reboot |
+| `GET` | `/` | Configuration form — **HTTP Basic Auth required** |
+| `POST` | `/save` | Validate + persist to NVS, then reboot (password never in the URL) |
+| `GET` | `/api/status` | JSON: uptime, STA/RSSI, clients, NAPT, heap, version (open) |
 
 ```bash
 # example

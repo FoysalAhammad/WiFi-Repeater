@@ -34,7 +34,7 @@
 
 ## 1. Product overview
 
-A proper **NAT-based WiFi range extender**. The ESP32 holds a **STA** link to your router and simultaneously runs a **softAP** for clients; lwIP's `CONFIG_LWIP_IPV4_NAPT` (compiled into the ESP32 core) forwards traffic between them. Configure it from the web page or the serial console — settings live in **Preferences (NVS)** and survive power cycles.
+A production-grade **NAT-based WiFi range extender**. The ESP32 holds a **STA** link to your router and simultaneously runs a **softAP** for clients; lwIP's `CONFIG_LWIP_IPV4_NAPT` forwards traffic between them. The configuration panel is behind **HTTP Basic Auth**, never echoes stored passwords back to the browser, HTML-escapes every field and validates input lengths. Uplink reconnects use **exponential back-off**, NAPT re-arms itself after every reconnect, and all settings live in **Preferences (NVS)**.
 
 **Use cases**
 
@@ -103,20 +103,21 @@ Open [espressif.github.io/esptool-js](https://espressif.github.io/esptool-js/) �
 
 1. Power the board and wait ~5 seconds.
 2. On your phone, open **Wi-Fi settings** and look for **`ESP_Repeater`**.
-3. Join it.
-4. Open **`http://192.168.4.1`** in a browser.
+3. Join it (password **`repeater123`**).
+4. Open **`http://192.168.4.1 (or http://repeater.local)`** in a browser.
 5. The control panel is now live — no internet needed on the ESP side.
 
 ---
 
 ## 5. Panel / usage guide
 
-1. Flash, power on, then join the open **`ESP_Repeater`** network.
-2. Open **`http://192.168.4.1`** and fill in **your router's SSID + password**.
-3. Optionally rename the repeater's own network and give it a password (leave `none` for open).
-4. Press **SAVE** — the board stores the config in flash and reboots.
-5. Join the **new repeater network** — internet now works through it.
-6. Done? Everything survives power cycles. Use `reset` on the serial console for a factory reset.
+1. Flash, power on, then join **`ESP_Repeater`** — password **`repeater123`**.
+2. Open **`http://192.168.4.1`** (or **`http://repeater.local`**) and log in — default **`admin` / `admin`**.
+3. Fill in **your router's SSID + password**; optionally rename the repeater AP (type `none` for open).
+4. Press **Save & Reboot** — input is validated, stored in NVS and the board restarts.
+5. Join the **new repeater network** — internet now works through it (NAPT).
+6. Monitor it with `GET /api/status` (JSON) or the LED (solid = link up).
+7. Clean slate? Serial `reset`, or **hold BOOT 5 seconds** for a factory reset.
 
 **Everything the panel does is also reachable from the serial console at 115200 baud.**
 
@@ -127,10 +128,11 @@ Open [espressif.github.io/esptool-js](https://espressif.github.io/esptool-js/) �
 | Item | Value |
 |:--|:--|
 | 📶 **AP SSID** | `ESP_Repeater` |
-| 🔑 **AP password** | `(open — no password)` |
-| 🌍 **Panel URL** | `http://192.168.4.1` |
+| 🔑 **AP password** | `repeater123` |
+| 🌍 **Panel URL** | `http://192.168.4.1 (or http://repeater.local)` |
 | 🖥️ **Control IP** | `192.168.4.1` |
-
+| 🔐 Panel login | `admin / admin — change it on the panel` |
+| 🔑 Factory reset | `hold BOOT 5 s — or serial reset` |
 
 > 💡 To change these, flash a build configured for your own credentials or use the serial console (see §7).
 
@@ -141,8 +143,9 @@ All endpoints are plain `GET` on the panel host:
 
 | Endpoint | Effect |
 |:--|:--|
-| ``/`` | Configuration form (uplink + AP credentials) |
-| ``/save`` | Persist settings to NVS and reboot |
+| ``/`` | Configuration form — **HTTP Basic Auth required** |
+| ``/save`` | Validate + persist to NVS, then reboot (password never in the URL) |
+| ``/api/status`` | JSON: uptime, STA/RSSI, clients, NAPT, heap, version (open) |
 
 ```bash
 # poll status
@@ -164,7 +167,10 @@ Repeater console — type HELP
 | ``pass <name>`` | Uplink router password |
 | ``apssid <name>`` | Repeater AP name |
 | ``appass <name>`` | Repeater AP password (`none` = open) |
-| ``show`` | Config + connection status |
+| ``user <name>`` | Web login user |
+| ``hpass <name>`` | Web login password |
+| ``show` / `status`` | Config + live status |
+| ``version`` | Print firmware version |
 | ``save`` | Commit to flash |
 | ``reset`` | Factory reset |
 | ``reboot`` | Restart the ESP32 |
@@ -178,8 +184,8 @@ Repeater console — type HELP
 > `pass <name>`
 > `apssid <name>`
 > `appass <name>`
-> `show`
-> `save`
+> `user <name>`
+> `hpass <name>`
 ```
 
 ---
@@ -189,7 +195,7 @@ Repeater console — type HELP
 | Setting | Default | Changeable at runtime |
 |:--|:--|:--|
 | WiFi network (AP) | `ESP_Repeater` | flash-time build setting |
-| AP password | `(open — no password)` | flash-time build setting |
+| AP password | `repeater123` | flash-time build setting |
 | Panel address | `192.168.4.1` | fixed |
 | Serial baud | `115200` | fixed |
 | Region/channel | auto (1–13) | follows the target |
@@ -202,9 +208,9 @@ Repeater console — type HELP
 
 | File | Size | SHA-256 |
 |:--|:--|:--|
-| `WiFiRepeater-full.bin` | 4.0 MB | `0e3d4da38baa08b2` |
-| `WiFiRepeater-app.bin` | 914.6 KB | `932bf404afed1e62` |
-| `WiFiRepeater-bootloader.bin` | 24.4 KB | `47bbbfca119fe871` |
+| `WiFiRepeater-full.bin` | 4.0 MB | `b7ba0493eba96844` |
+| `WiFiRepeater-app.bin` | 967.7 KB | `5563bff34c890211` |
+| `WiFiRepeater-bootloader.bin` | 22.9 KB | `7c5e6c42dcd3b658` |
 | `WiFiRepeater-partitions.bin` | 3.0 KB | `aaae2888c5a6a348` |
 | `WiFiRepeater-ota.bin` | 8.0 KB | `f94c5d786a7a8fab` |
 
@@ -222,7 +228,7 @@ sha256sum firmware/*
 Re-flash the **full** image, power-cycle, and wait ~10 s. 2.4 GHz only — many phones hide it if you are on 5 GHz-only.
 
 **❓ I joined the AP but the panel will not open**
-Type the address manually: `http://192.168.4.1`. Disable mobile data (Android) and any VPN.
+Type the address manually: `http://192.168.4.1 (or http://repeater.local)`. Disable mobile data (Android) and any VPN.
 
 **❓ The panel loads but every action fails**
 The ESP32/ESP8266 has a single radio: while scanning or attacking, the panel can stall for a second or two. Wait and retry.
