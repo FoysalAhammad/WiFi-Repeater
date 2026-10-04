@@ -1,0 +1,50 @@
+# ============================================================
+#  SOURCE CODE — LOCAL ONLY, NEVER PUBLISHED
+# ============================================================
+*.ino
+*.cpp
+*.c
+*.cc
+*.h
+*.hpp
+*.S
+*.pde
+src/
+lib/
+include/
+test/
+*.pio.ini
+platformio.ini
+platformio.cfg
+build.sh
+Makefile
+
+# build systems / caches
+.pio/
+build/
+out/
+.cache/
+*.elf
+*.map
+*.o
+*.a
+*.d
+
+# stale root-level firmware (superseded by firmware/)
+/*.bin
+/*.merged.bin
+
+# firmware binaries are attached with the release (not committed yet)
+firmware/
+
+# ============================================================
+#  EDITOR / OS / LOGS
+# ============================================================
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+*.log
+*.tmp
+*.bak

@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1140" height="210" viewBox="0 0 1140 210" role="img" aria-label="How it works">
+<defs>
+<linearGradient id="fb" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#00e5a0"/><stop offset="100%" stop-color="#002b3d"/></linearGradient>
+<marker id="ar" markerWidth="10" markerHeight="10" refX="8" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#a7f3e0"/></marker>
+</defs>
+<rect width="1140" height="210" rx="16" fill="#05070c"/>
+<rect x="14" y="14" width="1112" height="182" rx="12" fill="#0b0f18" stroke="#a7f3e0" stroke-opacity="0.35"/>
+<rect x="40.0" y="44" width="208.0" height="118" rx="14" fill="url(#fb)" stroke="#a7f3e0" stroke-opacity="0.85"/>
+<text x="144.0" y="95.0" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="18" font-weight="700" fill="#ffffff">Internet</text>
+<text x="144.0" y="123.0" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="18" font-weight="500" fill="#ffffff">via your router</text>
+<line x1="256.0" y1="103" x2="312.0" y2="103" stroke="#a7f3e0" stroke-width="4" marker-end="url(#ar)"/>
+<rect x="324.0" y="44" width="208.0" height="118" rx="14" fill="url(#fb)" stroke="#a7f3e0" stroke-opacity="0.85"/>
+<text x="428.0" y="95.0" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="18" font-weight="700" fill="#ffffff">ESP32 STA</text>
+<text x="428.0" y="123.0" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="18" font-weight="500" fill="#ffffff">connects to router</text>
+<line x1="540.0" y1="103" x2="596.0" y2="103" stroke="#a7f3e0" stroke-width="4" marker-end="url(#ar)"/>
+<rect x="608.0" y="44" width="208.0" height="118" rx="14" fill="url(#fb)" stroke="#a7f3e0" stroke-opacity="0.85"/>
+<text x="712.0" y="95.0" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="18" font-weight="700" fill="#ffffff">NAPT bridge</text>
+<text x="712.0" y="123.0" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="18" font-weight="500" fill="#ffffff">(lwIP)</text>
+<line x1="824.0" y1="103" x2="880.0" y2="103" stroke="#a7f3e0" stroke-width="4" marker-end="url(#ar)"/>
+<rect x="892.0" y="44" width="208.0" height="118" rx="14" fill="url(#fb)" stroke="#a7f3e0" stroke-opacity="0.85"/>
+<text x="996.0" y="95.0" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="18" font-weight="700" fill="#ffffff">ESP32 softAP</text>
+<text x="996.0" y="123.0" text-anchor="middle" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="18" font-weight="500" fill="#ffffff">clients join here</text>
+<circle cx="56.0" cy="50" r="15" fill="#05070c" stroke="#a7f3e0" stroke-width="2"/>
+<text x="56.0" y="55" text-anchor="middle" font-family="Segoe UI, Arial" font-size="14" font-weight="800" fill="#a7f3e0">1</text>
+<circle cx="340.0" cy="50" r="15" fill="#05070c" stroke="#a7f3e0" stroke-width="2"/>
+<text x="340.0" y="55" text-anchor="middle" font-family="Segoe UI, Arial" font-size="14" font-weight="800" fill="#a7f3e0">2</text>
+<circle cx="624.0" cy="50" r="15" fill="#05070c" stroke="#a7f3e0" stroke-width="2"/>
+<text x="624.0" y="55" text-anchor="middle" font-family="Segoe UI, Arial" font-size="14" font-weight="800" fill="#a7f3e0">3</text>
+<circle cx="908.0" cy="50" r="15" fill="#05070c" stroke="#a7f3e0" stroke-width="2"/>
+<text x="908.0" y="55" text-anchor="middle" font-family="Segoe UI, Arial" font-size="14" font-weight="800" fill="#a7f3e0">4</text>
+</svg>
